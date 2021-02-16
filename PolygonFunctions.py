@@ -29,7 +29,7 @@ def plot_polygon(polygon, color='dimgray', lwidth=1):
     plt.plot([p[0] for p in polygon], [p[1] for p in polygon], c=color, linewidth=lwidth, alpha=0.7)
     # fig.axes.get_xaxis().set_visible(False)
     # fig.axes.get_yaxis().set_visible(False)
-    plt.axis('off')
+    #plt.axis('off')
     #plt.show()
 
 

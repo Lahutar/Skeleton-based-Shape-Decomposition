@@ -56,10 +56,13 @@ def find_candidates(data, edge, bridges=0):
 
     # compute the bounds of the first and last node
     if bridges != 0:
-        bound_from, bound_to = move_bounds(edge.bound_from, edge.bound_to, bridges, len(data.countour)-1)
+        bound_from, bound_to = move_bounds(edge.bound_from, edge.bound_to, bridges, len(data.contour)-1)
+        if edge.node_to.is_end:
+            bound_to = edge.bound_to
         if bound_from is None or bound_to is None:
             print("could not move bounds")
-            return []
+            bound_from = edge.bound_from
+            bound_to = edge.bound_to
     else:
         bound_from = edge.bound_from
         bound_to = edge.bound_to
