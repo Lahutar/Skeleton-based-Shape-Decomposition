@@ -40,7 +40,7 @@ def decomposition(data, min_area=0, max_area=math.inf, opt = 'min_num', bridges=
     elif polygon_area < max_area:
         polygon_decomposition = tree_decomposition(data, min_area, max_area)
     else:
-        polygon_decomposition = branch_decomposition(data, min_area, max_area, opt, bridges)
+        polygon_decomposition, partial = branch_decomposition(data, min_area, max_area, opt, bridges)
     return polygon_decomposition
 
 """
@@ -61,11 +61,11 @@ compute decompositions for each branch individually
 def branch_decomposition(data, min_area=0, max_area=math.inf, opt = 'min_num', bridges=0):
     polygon_decomposition = []
     partial = False
-    start_time = int(time.time() * 1000)
+    start_time = int(time.time()/60)
     for edge in data.edges:
         edge_decomposition = linear_decomposition(data, edge, min_area, max_area, opt, bridges)
         polygon_decomposition = polygon_decomposition + edge_decomposition
-        current_time = int(time.time() * 1000)
+        current_time = int(time.time()/60)
         delta_time = current_time - start_time
         if delta_time > 10:
             partial = True

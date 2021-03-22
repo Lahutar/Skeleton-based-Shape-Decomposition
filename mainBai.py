@@ -105,7 +105,9 @@ def save_decomposition_info(result, folderpath):
             aspect_ratio = compute_aspectratio(result[1][i])
             writer.writerow({'area': area, 'size': size, 'aspect ratio': aspect_ratio})
 
-
+"""
+execute decomposition algorithm on folder without multithreading
+"""
 def execute_decomposition_folder(folderpath, min_area, max_area, opt, bridge_thresholds):
     files = get_files_from_folder(folderpath)
     all_results = []
@@ -114,7 +116,9 @@ def execute_decomposition_folder(folderpath, min_area, max_area, opt, bridge_thr
         all_results.append(result)
     return all_results
 
-
+"""
+execute decomposition algorithm on folder with multithreading
+"""
 def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thresholds, cores=10):
     files = get_files_from_folder(filepath)
     executor = ThreadPoolExecutor(max_workers=cores)
@@ -135,9 +139,7 @@ def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thr
         error_count = 0
 
         for future in future_list:
-            #if future.result(timeout=60):
             if future.done():
-                #print(future.result(),future.exception)
                 finished_count = finished_count + 1
                 e = future.exception()
                 if e is None:
@@ -147,8 +149,8 @@ def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thr
                             all_results.append(result)
                             saved.append(result[1])
                             save_decomposition(result)
+                            decomposition_to_txt(result, filepath)
                             #save_decomposition_info(result, filepath)
-                            #decomposition_to_txt(result, filepath)
                             #plot_decomposition(result, filepath)
                     else:
                         error_count = error_count + 1
@@ -158,7 +160,6 @@ def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thr
         all_finished = finished_count == len(future_list)
         runtime = runtime +1
         print('finished: '+str(finished_count)+' out of '+str(len(future_list))+' in '+str(runtime)+' with error '+str(error_count))
-        #print('finished: %a out of %b in %c time with %d errors'% (finished_count, len(future_list), runtime, error_count))
         time.sleep(5)
         
     for future in future_list:
@@ -168,7 +169,9 @@ def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thr
     
     return all_results
 
-
+"""
+execute decomposition algorithm on single file
+"""
 def execute_decomposition(filepath, min_area, max_area, opt, bridge_thresholds):
     print('execute: ', int(filepath.split("_")[1]))
     if os.path.exists(filepath):
@@ -184,7 +187,7 @@ def execute_decomposition(filepath, min_area, max_area, opt, bridge_thresholds):
                 else:
                     return [False]
             else:
-                if bridge_thresholds[1] is not None:
+                if bridge_thresholds[1] is not math.inf or bridge_thresholds[2] is not math.inf:
                     if len(data.contour) > bridge_thresholds[1] or data.object_area() > bridge_thresholds[2]:
                         bridges = bridge_thresholds[0]
                     else:
@@ -193,11 +196,6 @@ def execute_decomposition(filepath, min_area, max_area, opt, bridge_thresholds):
                     bridges = bridge_thresholds[0]
 
                 subpolygons = decomposition(data, min_area, max_area, opt, bridges)
-                #plt.clf()
-                #for p in subpolygons:
-                #    plot_polygon(p.exterior.coords)
-                #data.plot_skeleton()
-                #plt.show()
                 return [True, subpolygons, data, filepath, (min_area, max_area, opt, bridge_thresholds)]
         except:
             print("execute decomposition failed")
@@ -208,6 +206,7 @@ def execute_decomposition(filepath, min_area, max_area, opt, bridge_thresholds):
 
 #if __name__ == '__main__':
 """
+
 manual_input = input("Input manually? (y/n)")
 
 if manual_input == "y":
@@ -222,37 +221,28 @@ if manual_input == "y":
         contour_threshold = input("threshold on contour length:") 
         area_threshold = input("threshold on area:")
     else:
-        contour_threshold = None
-        area_threshold = None
+        contour_threshold = math.inf
+        area_threshold = math.inf
     
     bridges_thresholds = [bridges, contour_threshold, area_threshold]
 
 else:
+    min_area = 100
+    max_area = 2800
+    opt = 'max_fat'
+    bridges_thresholds = [0,math.inf,math.inf]
 """
-filepath = 'D:\\Neuer Ordner\\T13\\object_6_8.mat'
+
 min_area = 100
 max_area = 2800
+opt = 'max_fat'
+bridges_thresholds = [0, math.inf, math.inf]
 
+"""
+decompose all files inside a folder
+"""
 filefolder = 'D:\\Neuer Ordner\\T13\\*.mat'
 #save_object_infos(filefolder)
-#print(filefolder.replace('*.mat', 'output_'+str((min_area,max_area))+'\\'+filepath.split("_")[1]+'.txt'))
-execute_parallel_decomposition(filefolder, min_area, max_area, 'max_fat', [0, None, None])
-#print(len(P))
-#input_data = read_data(filepath)
-#data = SkelData(input_data)
-#data.build()
-#P = execute_decomposition(filepath, min_area, max_area, 'max_fat', [2, None, None])
-#for p in P[1]:
-#    plot_polygon(p.exterior.coords)
-#plt.show()
-#color = random_colors(len(data.edges))
-#for i in range(len(data.edges)):
-#    data.edges[i].plot(color[i],3)
-#edge = data.edges[0]
-#P = linear_decomposition(data, edge, min_area, max_area)
-#data.plot_skeleton()
-#plt.show()
-#data.plot_contour()
-#data.plot_skeleton()
-#plt.show()
+
+execute_parallel_decomposition(filefolder, min_area, max_area, opt, bridges_thresholds)
 
