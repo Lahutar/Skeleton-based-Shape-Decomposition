@@ -59,7 +59,10 @@ result = [True, subpolygons, data, filepath, (min_area, max_area, opt, bridge_th
 """
 def decomposition_to_txt(result, folderpath):
     object_name = result[3].split("_")[1]
-    new_directory = folderpath.replace('*.mat', 'txt_output_'+str(result[4]))
+    # if you want to save meta data in the filename
+    #new_directory = folderpath.replace('*.mat', 'txt_output_'+str(result[4]))
+    # if you want to have a simple output folder
+    new_directory = folderpath.replace('*.mat', 'txt_output')
     if not os.path.exists(new_directory):
         os.makedirs(new_directory)
     with open(new_directory+'\\'+object_name+'.txt', "w") as filehandle:
@@ -183,7 +186,9 @@ def execute_decomposition(filepath, min_area, max_area, opt, bridge_thresholds):
             if data.error:
                 if min_area <= data.object_area() <= max_area:
                     subpolygons = [Polygon(data.contour)]
-                    return [True, subpolygons, data, filepath, (min_area, max_area, 'whole')]
+                    # if you want to distinguish the polygons that were not partitioned with the skeleton
+                    #return [True, subpolygons, data, filepath, (min_area, max_area, 'whole')]
+                    return [True, subpolygons, data, filepath, (min_area, max_area, opt, bridge_thresholds)]
                 else:
                     return [False]
             else:
@@ -241,7 +246,7 @@ bridges_thresholds = [0, math.inf, math.inf]
 """
 decompose all files inside a folder
 """
-filefolder = 'D:\\Neuer Ordner\\T13\\*.mat'
+filefolder = 'D:\\Neuer Ordner\\T12\\skel\\*.mat'
 #save_object_infos(filefolder)
 
 execute_parallel_decomposition(filefolder, min_area, max_area, opt, bridges_thresholds)
