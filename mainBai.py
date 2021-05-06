@@ -10,6 +10,7 @@ from ReadBaiData import read_data
 from Graph import *
 from Decomposition import *
 from PolygonFunctions import *
+from statistics import mean, median
 
 from concurrent.futures import ThreadPoolExecutor
 import time
@@ -114,10 +115,16 @@ execute decomposition algorithm on folder without multithreading
 def execute_decomposition_folder(folderpath, min_area, max_area, opt, bridge_thresholds):
     files = get_files_from_folder(folderpath)
     all_results = []
+    time_results = []
     for f in files:
+        tic = time.perf_counter()
         result = execute_decomposition(f, min_area, max_area, opt, bridge_thresholds)
+        toc = time.perf_counter()
+        #print("object ", len(all_results), f"in {toc-tic:0.4f}")
         all_results.append(result)
-    return all_results
+        if result[0]:
+            time_results.append(round(toc-tic, 4))
+    return all_results, time_results
 
 """
 execute decomposition algorithm on folder with multithreading
@@ -126,6 +133,7 @@ def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thr
     files = get_files_from_folder(filepath)
     executor = ThreadPoolExecutor(max_workers=cores)
     future_list = []
+    time_result=[]
     for i in range(len(files)):
         future = executor.submit(execute_decomposition, files[i],  min_area, max_area, opt, bridge_thresholds)
         future_list.append(future)
@@ -170,7 +178,7 @@ def execute_parallel_decomposition(filepath, min_area, max_area, opt, bridge_thr
         if e is not None:
             print(e)
     
-    return all_results
+    return all_results, time_result
 
 """
 execute decomposition algorithm on single file
@@ -249,5 +257,19 @@ decompose all files inside a folder
 filefolder = 'D:\\Neuer Ordner\\T12\\skel\\*.mat'
 #save_object_infos(filefolder)
 
-execute_parallel_decomposition(filefolder, min_area, max_area, opt, bridges_thresholds)
+#execute_parallel_decomposition(filefolder, min_area, max_area, opt, bridges_thresholds)
+start_time =  time.perf_counter()
+#result, time_result = execute_decomposition_folder(filefolder, min_area, max_area, opt, bridges_thresholds)
+result, time_result = execute_parallel_decomposition(filefolder, min_area, max_area, opt, bridges_thresholds)
+end_time = time.perf_counter()
+overall_time = round(end_time-start_time, 4)
+print(overall_time)
+def time_to_txt(time_result, overall_time, folderpath):
+    with open(folderpath.replace('*.mat', 'multithread_time.txt'), "w") as filehandle:
+        for i in range(len(time_result)):
+            filehandle.write('%d\t%f s\n' % (i, time_result[i]))
+        filehandle.write('\nSplit %d objects\n' % len(time_result))
+        filehandle.write('Total time:\t%f s\n' % overall_time)
+        filehandle.write('Time per object:\tMin: %f s\tMax: %f s\tMean: %f s\tMedian: %f s\n' % (min(time_result), max(time_result), mean(time_result), median(time_result)))
 
+#time_to_txt(time_result, overall_time, filefolder)

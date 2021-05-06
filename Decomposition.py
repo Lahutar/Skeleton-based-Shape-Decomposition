@@ -67,7 +67,7 @@ def branch_decomposition(data, min_area=0, max_area=math.inf, opt = 'min_num', b
         polygon_decomposition = polygon_decomposition + edge_decomposition
         current_time = int(time.time()/60)
         delta_time = current_time - start_time
-        if delta_time > 10:
+        if delta_time > 5:
             partial = True
             break
     return polygon_decomposition, partial
