@@ -10,5 +10,5 @@ The decomposition approach can be adapted for different skeletonization methods.
 
 Bai X, Latecki LJ, Liu WY. Skeleton pruning by contour partitioning with discrete curve evolution. IEEE Trans Pattern Anal Mach Intell. 2007 Mar;29(3):449-62. doi: 10.1109/TPAMI.2007.59. PMID: 17224615.
 
-Example input shapes and their skeletons are given in the example_data folder.
+Example input shapes and their skeleton data are given in the example_data folder, which also includes exemplary decompositions.
 
